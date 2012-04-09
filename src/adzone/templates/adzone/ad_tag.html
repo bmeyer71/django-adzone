@@ -1,3 +1,5 @@
+{% load thumbnail %}
+
 {% if ad.textad %}
         <p><a target="_blank" href="{% if perms.adzone.can_change %}{% url admin:adzone_textad_change ad.id %}{% else %}{{ ad.get_absolute_url }}{% endif %}" class="adText">
 	    {{ ad.textad.content }}
@@ -7,7 +9,9 @@
 {% if ad.bannerad %}
     <a target="_blank" href="{% if perms.adzone.can_change %}{% url admin:adzone_bannerad_change ad.id %}{% else %}{{ ad.get_absolute_url }}{%\
  endif %}" class="adImage">
-      <img src="{{ ad.bannerad.content.url }}" alt="{{ ad.title }}" />
+      {% thumbnail ad.bannerad.content "{{ ad.zone.width }}x{{ ad.zone.height }}" crop="center" as img %}
+      <img src="{{ img.url }}" alt="{{ ad.title }}" />
+      {% endthumbnail %}
     </a>
 {% endif %}
 
