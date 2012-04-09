@@ -50,6 +50,10 @@ class AdZone(models.Model):
     slug = models.SlugField()
     description = models.TextField()
 
+    # image size limits
+    width = models.IntegerField()
+    height = models.IntegerField()
+
     class Meta:
         verbose_name = 'Ad Zone'
         verbose_name_plural = 'Ad Zones'
@@ -69,6 +73,7 @@ class AdBase(models.Model):
     enabled = models.BooleanField(default=False)
     since = models.DateTimeField(default=datetime.now)
     updated = models.DateTimeField(editable=False)
+    impression_limit = models.IntegerField()
 
     # Relations
     advertiser = models.ForeignKey(Advertiser)
@@ -123,3 +128,7 @@ class TextAd(AdBase):
 class BannerAd(AdBase):
     """ A standard banner Ad """
     content = models.ImageField(upload_to="adzone/bannerads/")
+
+class CodeAd(AdBase):
+    """ A code-based Ad"""
+    content = models.TextField()

@@ -1,18 +1,19 @@
-{% comment %}
-A instace of AdBase is passed to this tag.
-
-... more documentation needed ...
-
-{% endcomment %}
-
 {% if ad.textad %}
-    <div class="ad_text">
-        <p><a target="_blank" href="{{ ad.get_absolute_url }}">{{ ad.textad.content }}</a></p>
-    </div>
+        <p><a target="_blank" href="{% if perms.adzone.can_change %}{% url admin:adzone_textad_change ad.id %}{% else %}{{ ad.get_absolute_url }}{% endif %}" class="adText">
+	    {{ ad.textad.content }}
+	</a></p>
 {% endif %}
 
 {% if ad.bannerad %}
-    <div class="ad_banner">
-        <a target="_blank" href="{{ ad.get_absolute_url }}"><img src="{{ ad.bannerad.content.url }}" alt="{{ ad.title }}" /></a>
-    </div>
+    <a target="_blank" href="{% if perms.adzone.can_change %}{% url admin:adzone_bannerad_change ad.id %}{% else %}{{ ad.get_absolute_url }}{%\
+ endif %}" class="adImage">
+      <img src="{{ ad.bannerad.content.url }}" alt="{{ ad.title }}" />
+    </a>
 {% endif %}
+
+{% if ad.codead %}
+    <a target="_blank" href="{% if perms.adzone.can_change %}{% url admin:adzone_codead_change ad.id %}{% else %}{{ ad.get_absolute_url }}{%\
+ endif %}" class="adCode">{{ ad.codead.content|safe  }}</a>
+{% endif %}
+
+
