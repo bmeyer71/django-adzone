@@ -39,6 +39,7 @@ def random_zone_ad(context, ad_category, ad_zone):
             break
 
     to_return['ad'] = ad
+    to_return['request'] = context["request"]
     
     # Record a impression for the ad
     if context.has_key('from_ip') and ad:
