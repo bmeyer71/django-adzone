@@ -27,6 +27,9 @@ class AdBaseAdmin(admin.ModelAdmin):
 class TextAdAdmin(AdBaseAdmin):
     search_fields = ['title', 'url', 'content']
 
+class CodeAdAdmin(AdBaseAdmin):
+    search_fields = ['title', 'url', 'content']
+
 class AdClickAdmin(admin.ModelAdmin):
     search_fields = ['ad', 'source_ip']
     list_display = ['ad', 'click_date', 'source_ip']
@@ -43,6 +46,7 @@ admin.site.register(Advertiser, AdvertiserAdmin)
 admin.site.register(AdCategory, AdCategoryAdmin)
 admin.site.register(AdZone, AdZoneAdmin)
 admin.site.register(TextAd, TextAdAdmin)
+admin.site.register(CodeAd, CodeAdAdmin)
 admin.site.register(BannerAd, AdBaseAdmin)
 admin.site.register(AdClick, AdClickAdmin)
 admin.site.register(AdImpression, AdImpressionAdmin)
