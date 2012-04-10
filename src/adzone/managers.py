@@ -1,5 +1,4 @@
 from django.db import models
-from adzone.models import *
 
 class AdManager(models.Manager):
     """ A Custom Manager for ads """
@@ -13,8 +12,4 @@ class AdManager(models.Manager):
             ads = self.get_query_set().filter(category__slug=ad_category, zone__slug=ad_zone).order_by('?')
         except IndexError:
             return None;
-        else:
-            for ad in ads:
-                ic = len(AdImpression.objects.filter(ad=ad))
-                if ad.impression_limit < ic:
-                    return ad
+        return ads

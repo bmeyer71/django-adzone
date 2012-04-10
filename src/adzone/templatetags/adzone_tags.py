@@ -29,7 +29,15 @@ def random_zone_ad(context, ad_category, ad_zone):
     to_return = {}
 
     # Retrieve a random ad for the category and zone
-    ad = AdBase.objects.get_random_ad(ad_category, ad_zone)
+    ads = AdBase.objects.get_random_ad(ad_category, ad_zone)
+    ad = None
+
+    for a in ads:
+        ic = len(AdImpression.objects.filter(ad=a))
+        if ic < a.impression_limit:
+            ad = a
+            break
+
     to_return['ad'] = ad
     
     # Record a impression for the ad
