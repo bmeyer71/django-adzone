@@ -10,6 +10,9 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+
 from adzone.managers import AdManager
 
 class Advertiser(models.Model):
@@ -125,9 +128,11 @@ class TextAd(AdBase):
     """ A most basic, text based advert """
     content = models.TextField()
 
+#Uses the media storage settings from settings.py to determine storage for the uploaded image
+media_storage = FileSystemStorage(location=settings.MEDIA_ROOT,base_url=settings.MEDIA_URL)
 class BannerAd(AdBase):
     """ A standard banner Ad """
-    content = models.ImageField(upload_to="adzone/bannerads/")
+    content = models.ImageField(upload_to="adzone/bannerads/",storage=media_storage)
 
 class CodeAd(AdBase):
     """ A code-based Ad"""
