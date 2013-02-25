@@ -25,7 +25,8 @@ class Advertiser(models.Model):
         verbose_name=_(u'Company Name'), max_length=255)
     website = models.URLField(
         verbose_name=_(u'Company Site'), verify_exists=(settings.DEBUG==False))
-    user = models.ForeignKey(User)
+    #~ user = models.ForeignKey(User)
+    user = models.ForeignKey('auth.User', verbose_name=_('User'), null=True, blank=True)
 
     class Meta:
         verbose_name = _(u'Ad Provider')
