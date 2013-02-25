@@ -48,6 +48,8 @@ h2. Requirements
 
 There are no external requirements for this project.
 
+Optional requirement if you want to use images: sorl-thumbnail
+
 h2. Installing
 
 Installation instructions may vary depending on your environment.
