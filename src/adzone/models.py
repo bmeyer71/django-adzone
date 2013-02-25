@@ -87,7 +87,7 @@ class AdBase(models.Model):
     since = models.DateTimeField(
         verbose_name=_(u'Since'), default=datetime.now)
     updated = models.DateTimeField(verbose_name=_(u'Updated'), editable=False)
-    impression_limit = models.IntegerField()
+    impression_limit = models.IntegerField(default=0)
 
     # Relations
     advertiser = models.ForeignKey(Advertiser, verbose_name=_("Ad Provider"))
