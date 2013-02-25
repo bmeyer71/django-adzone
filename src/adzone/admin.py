@@ -53,7 +53,7 @@ class AdClickAdmin(admin.ModelAdmin):
 class AdImpressionAdmin(admin.ModelAdmin):
     search_fields = ['ad', 'source_ip']
     list_display = ['ad', 'impression_date', 'source_ip']
-    list_filter = ['impression_date']
+    list_filter = ['impression_date', 'ad']
     date_hierarchy = 'impression_date'
 
 admin.site.register(Advertiser, AdvertiserAdmin)
