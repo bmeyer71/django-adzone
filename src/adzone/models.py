@@ -24,7 +24,7 @@ class Advertiser(models.Model):
     company_name = models.CharField(
         verbose_name=_(u'Company Name'), max_length=255)
     website = models.URLField(
-        verbose_name=_(u'Company Site'), verify_exists=(settings.DEBUG==False))
+        verbose_name=_(u'Company Site'))
     #~ user = models.ForeignKey(User)
     user = models.ForeignKey('auth.User', verbose_name=_('User'), null=True, blank=True)
 
@@ -82,8 +82,7 @@ class AdBase(models.Model):
     display return etc.
     """
     title = models.CharField(verbose_name=_(u'Title'), max_length=255)
-    url = models.URLField(verbose_name=_(u'Advertised URL'),
-                          verify_exists=(settings.DEBUG==False))
+    url = models.URLField(verbose_name=_(u'Advertised URL'))
     enabled = models.BooleanField(verbose_name=_(u'Enabled'), default=False)
     since = models.DateTimeField(
         verbose_name=_(u'Since'), default=datetime.now)
