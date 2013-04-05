@@ -1,199 +1,218 @@
 from django.test import TestCase
-from django.test.client import Client
-from django.core.handlers.wsgi import WSGIRequest
-from django.core.urlresolvers import reverse
-
-from adzone.models import *
 from django.contrib.auth.models import User
+from django.template import Template
+from django.template.response import SimpleTemplateResponse
+from django.utils import timezone
+
+from adzone.models import Advertiser, AdCategory, AdZone, AdBase
+from adzone.models import AdImpression, AdClick
+from adzone.managers import AdManager
+from adzone.templatetags.adzone_tags import random_zone_ad, random_category_ad
+
+
+# Helper functions to help setting up the tests
+user = lambda: User.objects.create_user('test', 'test@example.com', 'secret')
+
 
 def datenow():
-    from datetime import datetime
-    return datetime.now()
+    return timezone.now()
 
-class RequestFactory(Client):
-    """
-    Class that lets you create mock Request objects for use in testing.
-    
-    Usage:
-    
-    rf = RequestFactory()
-    get_request = rf.get('/hello/')
-    post_request = rf.post('/submit/', {'foo': 'bar'})
-    
-    This class re-uses the django.test.client.Client interface, docs here:
-    http://www.djangoproject.com/documentation/testing/#the-test-client
-    
-    Once you have a request object you can pass it to any view function, 
-    just as if that view had been hooked up using a URLconf.
-    
-    """
-    def request(self, **request):
-        """
-        Similar to parent class, but returns the request object as soon as it
-        has created it.
-        """
-        environ = {
-            'HTTP_COOKIE': self.cookies,
-            'PATH_INFO': '/',
-            'QUERY_STRING': '',
-            'REQUEST_METHOD': 'GET',
-            'SCRIPT_NAME': '',
-            'SERVER_NAME': 'testserver',
-            'SERVER_PORT': 80,
-            'SERVER_PROTOCOL': 'HTTP/1.1',
-            'REMOTE_ADDR': '127.0.0.1',
-        }
-        environ.update(self.defaults)
-        environ.update(request)
-        return WSGIRequest(environ)
 
-class AdvertisingTestCase(TestCase):
-    def setUp(self):
-        self.request = RequestFactory().request()
+def create_objects():
+    """ Simple helper to create advertiser, category and zone """
+    advertiser = Advertiser.objects.create(
+        company_name='Advertiser Name 1',
+        website='http://example.com/', user=user())
 
-        self.user = User.objects.create_user('test', 'test@example.com', 'testpass')
+    category = AdCategory.objects.create(
+        title='Internet Services',
+        slug='internet-services',
+        description='All internet based services')
 
-        self.advertiser = Advertiser.objects.create(
-                company_name = 'teh_node Web Development',
-                website = 'http://andre.smoenux.webfactional.com/',
-                user = self.user)
+    adzone = AdZone.objects.create(
+        title='Sidebar',
+        slug='sidebar',
+        description='Sidebar Zone Description')
 
-        # Categories setup
-        self.category = AdCategory.objects.create(
-                title = 'Internet Services',
-                slug = 'internet-services',
-                description = 'All internet based services')
+    return advertiser, category, adzone
 
-        self.category2 = AdCategory.objects.create(
-                title = 'Category Two',
-                slug = 'categorytwo',
-                description = 'A Second Category')
 
-        # Zones setup
-        self.adzone = AdZone.objects.create(
-                title = 'Sidebar',
-                slug = 'sidebar',
-                description = 'Side Bar Ads')
+def create_advert():
+    """ Simple helper to create a single ad """
+    advertiser, category, zone = create_objects()
+    ad = AdBase.objects.create(
+        title='Ad Title',
+        url='www.example.com',
+        advertiser=advertiser,
+        category=category,
+        zone=zone,
+    )
+    return ad
 
-        self.adzone2 = AdZone.objects.create(
-                title = 'Content Banner',
-                slug = 'contentbanner',
-                description = 'Content Adverts')
 
-        # Ad setup
-        self.ad = TextAd.objects.create(
-                title = 'First Ad',
-                content = 'For all your web design and development needs, at competitive rates.',
-                url = 'http://www.teh-node.co.za/',
-                enabled = True,
-                advertiser = self.advertiser,
-                category = self.category,
-                zone = self.adzone)
+# Now follows the actual tests
+class AdvertiserTestCase(TestCase):
 
-        self.ad2 = TextAd.objects.create(
-                title = 'Second Ad',
-                content = 'A second advert.',
-                url = 'http://www.teh-node.co.za/',
-                enabled = True,
-                advertiser = self.advertiser,
-                category = self.category2,
-                zone = self.adzone2)
+    def test_model(self):
+        Advertiser(
+            company_name='Advertiser Name 1',
+            website='http://example.com/',
+            user=user())
 
-        self.ad3 = TextAd.objects.create(
-                title = 'A Third Ad',
-                content = 'A third advert.',
-                url = 'http://www.teh-node.co.za/',
-                enabled = True,
-                advertiser = self.advertiser,
-                category = self.category2,
-                zone = self.adzone2)
+    def test_get_website_url(self):
+        advertiser = Advertiser(
+            company_name='Advertiser Name 1',
+            website='http://example.com/',
+            user=user())
 
-        # AdImpression Setup
-        self.impression1 = AdImpression.objects.create(
-                impression_date=datenow(),
-                source_ip='127.0.0.2',
-                ad=self.ad)
-        self.impression2 = AdImpression.objects.create(
-                impression_date=datenow(),
-                source_ip='127.0.0.3',
-                ad=self.ad2)
+        self.assertEqual(
+            'http://example.com/',
+            advertiser.get_website_url())
 
-        # Clicks Setup
-        self.adclick1 = AdClick.objects.create(
-                click_date=datenow(),
-                source_ip='127.0.0.1',
-                ad=self.ad)
-        
-class AdvertiserTestCase(AdvertisingTestCase):
-    def testAdvertiser(self):
-        self.assertEquals(self.advertiser.get_website_url(),
-                          'http://andre.smoenux.webfactional.com/')
 
-class ZoneTestCase(AdvertisingTestCase):
-    def testAdZone(self):
-        # TODO: Remove test?
-        ## This test is kinda useless, should we remove it?
-        self.assertEquals(self.adzone.__unicode__(), 'Sidebar')
+class AdCategoryTestCase(TestCase):
 
-    def testAdinZone(self):
-        # TODO: Remove test?
-        ## This test is kinda useless, should we remove it?
-        ads = TextAd.objects.filter(zone__slug='sidebar')
-        self.assertEquals(len(ads), 1)
+    def test_model(self):
+        AdCategory(
+            title='Internet Services',
+            slug='internet-services',
+            description='All internet based services')
 
-class AdvertTestCase(AdvertisingTestCase):
-    def testAd(self):
-        self.assertEquals(reverse(
-            'adzone_ad_view',
-            args=['1']
-        )[-8:], '/view/1/')
-        adimpressions = AdImpression.objects.filter(ad=self.ad)
-        self.assertEquals(len(adimpressions), 1)
-        self.assertEquals(adimpressions[0].source_ip, '127.0.0.2')
 
-    def testAdAdvertiser(self):
-        # TODO: Remove test?
-        ## This test is kinda useless, should we remove it?
-        self.assertEquals(self.ad.advertiser.__unicode__(), 'teh_node Web Development')
-        self.assertEquals(self.ad.advertiser.company_name, 'teh_node Web Development')
+class AdZoneTestCase(TestCase):
 
-    def testAddsInCategory(self):
-        # TODO: Remove test?
-        ## This test is kinda useless, should we remove it?
-        ads = TextAd.objects.filter(category__slug='internet-services')
-        self.assertEquals(len(ads), 1)
-        self.assertEquals(ads[0].title, 'First Ad')
+    def test_model(self):
+        AdZone(
+            title='Ad Zone Title',
+            slug='adzone',
+            description='Ad Zone Description')
 
-    def testRandomAd(self):
-        self.assertEquals(
-            AdBase.objects.get_random_ad('sidebar', 'internet-services').textad,
-            self.ad
+
+class AdBaseTestCase(TestCase):
+
+    urls = 'adzone.urls'
+
+    def test_model(self):
+        advertiser, category, zone = create_objects()
+        AdBase(
+            title='Ad Title',
+            url='www.example.com',
+            advertiser=advertiser,
+            category=category,
+            zone=zone
         )
-        ad_list = [self.ad, self.ad2, self.ad3]
-        self.failUnless(
-            AdBase.objects.get_random_ad('sidebar').textad in ad_list)
 
-class ImpressionTestCase(AdvertisingTestCase):
-    def testImpression(self):
-        impressions = AdImpression.objects.all()
-        self.assertEquals(len(impressions), 2)
+    def test_unicode(self):
+        advert = create_advert()
+        self.assertEqual('Ad Title', str(advert))
 
-class ClickTestCase(AdvertisingTestCase):
-    def testClicks(self):
-        clicks = AdClick.objects.all()
-        self.assertEquals(len(clicks), 1)
+    def test_absolute_url(self):
+        advert = create_advert()
+        self.assertEqual('/view/1/', advert.get_absolute_url())
 
-    def testClickOnAds(self):
-        c = Client(REMOTE_ADDR='127.0.0.1')
-        response = c.get(reverse(
-            'adzone_ad_view',
-            args=['1']
-        ))
-        self.assertEquals(len(AdClick.objects.all()), 2)
-        click = AdClick.objects.all()[1]
-        self.assertEquals(click.source_ip, '127.0.0.1')
 
-    def testInvalidAdURL(self):
-        c = Client(REMOTE_ADDR='127.0.0.1')
-        response = c.get('/te/10')
-        self.assertEquals(len(AdClick.objects.all()), 1)
+class AdManagerTestCase(TestCase):
+
+    def setUp(self):
+        # Create two categories and two adverts
+        advertiser, category, zone = create_objects()
+        category2 = AdCategory.objects.create(
+            title='Category 2',
+            slug='category-2',
+            description='Category 2 description'
+        )
+        AdBase.objects.create(
+            title='Ad Title',
+            url='www.example.com',
+            advertiser=advertiser,
+            category=category,
+            zone=zone
+        )
+        AdBase.objects.create(
+            title='Ad 2 Title',
+            url='www.example2.com',
+            advertiser=advertiser,
+            category=category2,
+            zone=zone
+        )
+
+    def test_manager_exists(self):
+        AdManager
+
+    def test_get_random_ad(self):
+        advert = AdBase.objects.get_random_ad('sidebar')
+        self.assertIn(advert.id, [1, 2])
+
+    def test_get_random_ad_by_category(self):
+        advert = AdBase.objects.get_random_ad('sidebar',
+                                              ad_category='category-2')
+        self.assertIn(advert.id, [2])
+
+
+class AdImpressionTestCase(TestCase):
+
+    def test_model(self):
+        advert = create_advert()
+        AdImpression(
+            impression_date=datenow(),
+            source_ip='127.0.0.1',
+            ad=advert,
+        )
+
+
+class AdClickTestCase(TestCase):
+
+    def test_model(self):
+        advert = create_advert()
+        AdClick(
+            click_date=datenow(),
+            source_ip='127.0.0.1',
+            ad=advert,
+        )
+
+
+class TemplateTagsTestCase(TestCase):
+
+    def test_random_zone_ad_creates_impression(self):
+        create_advert()
+        random_zone_ad({'from_ip': '127.0.0.1'}, 'sidebar')
+        self.assertEqual(AdImpression.objects.all().count(), 1)
+
+    def test_random_zone_ad_renders(self):
+        template = Template("{% load adzone_tags %}{% random_zone_ad 'sidebar' %}")
+        response = SimpleTemplateResponse(template)
+        response.render()
+        self.assertTrue(response.is_rendered)
+
+    def test_random_category_ad_creates_impression(self):
+        create_advert()
+        random_category_ad(
+            {'from_ip': '127.0.0.1'}, 'sidebar', 'internet-services')
+        self.assertEqual(AdImpression.objects.all().count(), 1)
+
+    def test_random_category_ad_renders(self):
+        template = Template("{% load adzone_tags %}{% random_category_ad 'sidebar' 'internet-services' %}")
+        response = SimpleTemplateResponse(template)
+        response.render()
+        self.assertTrue(response.is_rendered)
+
+
+class AdViewTestCase(TestCase):
+
+    urls = 'adzone.urls'
+
+    def test_request_redirects(self):
+        create_advert()
+        response = self.client.get('/view/1/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_request_redirect_chain(self):
+        create_advert()
+        response = self.client.get('/view/1/', follow=True)
+        chain = [('http://www.example.com', 302), ]
+        self.assertEqual(response.redirect_chain, chain)
+
+    def test_request_creates_click(self):
+        create_advert()
+        self.client.get('/view/1/')  # dont need response for this test
+        self.assertEqual(AdClick.objects.filter(ad__id=1).count(), 1)

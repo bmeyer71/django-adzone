@@ -1,5 +1,9 @@
 {% load thumbnail %}
 
+{% comment %}
+    A instance of AdBase is passed to this tag.
+{% endcomment %}
+
 {% if ad.textad %}
         <p><a target="_blank" href="{% if request.user.is_superuser %}{% url admin:adzone_textad_change ad.id %}{% else %}{{ ad.get_absolute_url }}{% endif %}" class="adText">
 	    {{ ad.textad.content }}
