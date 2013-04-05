@@ -20,12 +20,16 @@ class AdvertiserAdmin(admin.ModelAdmin):
     search_fields = ['company_name', 'website']
     list_display = ['company_name', 'website', 'user']
 
+
 class AdCategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['title']}
     list_display = ['title', 'slug']
 
+
 class AdZoneAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ['title']}
     list_display = ['title', 'slug', 'description']
+
 
 class AdBaseAdmin(admin.ModelAdmin):
     list_display = ['title', 'url', 'advertiser', 'since', 'updated', 'enabled']
@@ -49,6 +53,7 @@ class AdClickAdmin(admin.ModelAdmin):
     list_display = ['ad', 'click_date', 'source_ip']
     list_filter = ['click_date']
     date_hierarchy = 'click_date'
+
 
 class AdImpressionAdmin(admin.ModelAdmin):
     search_fields = ['ad', 'source_ip']

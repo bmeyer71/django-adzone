@@ -5,11 +5,14 @@
 # Please see the text file LICENCE for more information
 # If this script is distributed, it must be accompanied by the Licence
 
+from datetime import datetime
 from django import template
 from adzone.models import AdBase, AdImpression
-from datetime import datetime
+
+from django.utils import timezone
 
 register = template.Library()
+
 
 @register.inclusion_tag('adzone/ad_tag.html', takes_context=True)
 def random_zone_ad(context, ad_zone):
@@ -32,20 +35,21 @@ def random_zone_ad(context, ad_zone):
     # Retrieve a random ad for the zone
     ad = AdBase.objects.get_random_ad(ad_zone)
     to_return['ad'] = ad
-    
+
     # Record a impression for the ad
     if context.has_key('from_ip') and ad:
         from_ip = context.get('from_ip')
         try:
             impression = AdImpression(
                     ad=ad,
-                    impression_date=datetime.now(),
+                    impression_date=timezone.now(),
                     source_ip=from_ip
             )
             impression.save()
         except:
             pass
     return to_return
+
 
 @register.inclusion_tag('adzone/ad_tag.html', takes_context=True)
 def random_category_ad(context, ad_zone, ad_category):
@@ -80,7 +84,7 @@ def random_category_ad(context, ad_zone, ad_category):
         try:
             impression = AdImpression(
                     ad=ad,
-                    impression_date=datetime.now(),
+                    impression_date=timezone.now(),
                     source_ip=from_ip
             )
             impression.save()

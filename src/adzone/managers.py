@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class AdManager(models.Manager):
     """ A Custom Manager for ads """
 
@@ -34,7 +35,6 @@ class AdManager(models.Manager):
                     zone__slug=ad_zone).order_by('?')
                 if ads != []:
                     for item in ads:
-                        print item
                         if item.impression_limit == 0:
                             ad = item
                         else:
