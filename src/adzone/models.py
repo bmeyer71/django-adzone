@@ -5,8 +5,6 @@
 # Please see the text file LICENCE for more information
 # If this script is distributed, it must be accompanied by the Licence
 
-from datetime import datetime
-
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
@@ -14,6 +12,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+
+from django.utils import timezone
 
 from adzone.managers import AdManager
 
@@ -25,7 +25,6 @@ class Advertiser(models.Model):
         verbose_name=_(u'Company Name'), max_length=255)
     website = models.URLField(
         verbose_name=_(u'Company Site'))
-    #~ user = models.ForeignKey(User)
     user = models.ForeignKey('auth.User', verbose_name=_('User'), null=True, blank=True)
 
     class Meta:
@@ -85,7 +84,8 @@ class AdBase(models.Model):
     url = models.URLField(verbose_name=_(u'Advertised URL'))
     enabled = models.BooleanField(verbose_name=_(u'Enabled'), default=False)
     since = models.DateTimeField(
-        verbose_name=_(u'Since'), default=datetime.now)
+        verbose_name=_(u'Since'), default=timezone.now)
+    ad_expiry = models.DateTimeField(verbose_name=_(u'Expiry Date'), blank=True, null=True)
     updated = models.DateTimeField(verbose_name=_(u'Updated'), editable=False)
     impression_limit = models.IntegerField(default=0)
 
@@ -109,7 +109,7 @@ class AdBase(models.Model):
         return ('adzone_ad_view', [self.id])
 
     def save(self, *args, **kwargs):
-        self.updated = datetime.now()
+        self.updated = timezone.now()
         super(AdBase, self).save(*args, **kwargs)
 
 class AdImpression(models.Model):
@@ -117,7 +117,7 @@ class AdImpression(models.Model):
     The AdImpression Model will record every time the ad is loaded on a page
     """
     impression_date = models.DateTimeField(
-        verbose_name=_(u'When'), default=datetime.now)
+        verbose_name=_(u'When'), default=timezone.now)
     source_ip = models.IPAddressField(
         verbose_name=_(u'Who'), null=True, blank=True)
     ad = models.ForeignKey(AdBase)
@@ -131,7 +131,7 @@ class AdClick(models.Model):
     The AdClick model will record every click that a add gets
     """
     click_date = models.DateTimeField(
-        verbose_name=_(u'When'), default=datetime.now)
+        verbose_name=_(u'When'), default=timezone.now)
     source_ip = models.IPAddressField(
         verbose_name=_(u'Who'), null=True, blank=True)
     ad = models.ForeignKey(AdBase)
