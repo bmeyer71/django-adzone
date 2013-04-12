@@ -10,6 +10,10 @@ from django import template
 from adzone.models import AdBase, AdImpression
 
 from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.core.urlresolvers import reverse
+
+import re
 
 register = template.Library()
 
@@ -48,6 +52,7 @@ def random_zone_ad(context, ad_zone):
             impression.save()
         except:
             pass
+    to_return['request'] = context['request']
     return to_return
 
 
@@ -91,3 +96,21 @@ def random_category_ad(context, ad_zone, ad_category):
         except:
             pass
     return to_return
+
+@register.simple_tag(takes_context=True)
+def url_keyword(context, link_ad):
+    ad_text = link_ad.textad.content
+    request = context['request']
+    try:
+        ad_keyword = re.search(r"\[\[(\w+)\]\]", ad_text)
+    except:
+        return ad_text
+    keyword = ad_keyword.group(1)
+    text = ad_text.split(ad_keyword.group(0))
+    if request.user.is_superuser:
+        ad_url = reverse('admin:adzone_textad_change', args=(link_ad.id,))
+    else:
+        ad_url = reverse('adzone_ad_view', args=(link_ad.id,))
+
+    result = '<p>%s<a target="_blank" href="%s" class="adText">%s</a>%s</p>' % (text[0], ad_url, keyword, text[1])
+    return mark_safe(result)
