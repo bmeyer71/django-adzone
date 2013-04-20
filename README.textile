@@ -57,14 +57,16 @@ either disable them or add your site admin to the whitelist. If you dont,
 there is a risk that certain fields may not show up when you want to edit
 anything.
 
-Optional requirement if you want to use images: sorl-thumbnail
-
 h2. Installing
 
 Installation instructions may vary depending on your environment.
 To install system wide however, just run:
 
 @python setup.py install@
+
+h3. Requirements
+
+Optional requirement if you want to use images: sorl-thumbnail
 
 h2. How to use
 

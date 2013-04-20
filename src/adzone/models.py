@@ -137,7 +137,7 @@ class AdClick(models.Model):
 # Example Ad Types
 class TextAd(AdBase):
     """ A most basic, text based advert """
-    content = models.TextField(verbose_name=_(u'Content'))
+    content = models.TextField(verbose_name=_(u'Content'), help_text="Wrap keyword to be used with URL in double brackets eg: [[keyword]]")
 
 #Uses the media storage settings from settings.py to determine storage for the uploaded image
 media_storage = FileSystemStorage(location=settings.MEDIA_ROOT,base_url=settings.MEDIA_URL)
