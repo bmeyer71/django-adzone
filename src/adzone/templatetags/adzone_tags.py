@@ -102,10 +102,15 @@ def url_keyword(context, link_ad):
     ad_text = link_ad.textad.content
     request = context['request']
     try:
-        ad_keyword = re.search(r"\[\[(\w+)\]\]", ad_text)
+        ad_keyword = re.search(r"\[\[(.*?)\]\]", ad_text)
     except:
         return ad_text
-    keyword = ad_keyword.group(1)
+
+    if ad_keyword == None:
+        return ad_text
+    else:
+        keyword = ad_keyword.group(1)
+
     text = ad_text.split(ad_keyword.group(0))
     if request.user.is_superuser:
         ad_url = reverse('admin:adzone_textad_change', args=(link_ad.id,))
