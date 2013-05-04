@@ -32,8 +32,8 @@ class AdZoneAdmin(admin.ModelAdmin):
 
 
 class AdBaseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'url', 'advertiser', 'since', 'updated', 'enabled']
-    list_filter = ['updated', 'enabled', 'since', 'updated']
+    list_display = ['title', 'url', 'advertiser', 'since', 'updated', 'ad_expiry', 'enabled']
+    list_filter = ['updated', 'enabled', 'since', 'updated', 'ad_expiry']
     search_fields = ['title', 'url']
 
 class TextAdAdmin(AdBaseAdmin):
