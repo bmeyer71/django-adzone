@@ -51,7 +51,7 @@ class BannerAdAdmin(AdBaseAdmin):
 class AdClickAdmin(admin.ModelAdmin):
     search_fields = ['ad', 'source_ip']
     list_display = ['ad', 'click_date', 'source_ip']
-    list_filter = ['click_date']
+    list_filter = ['click_date', 'ad']
     date_hierarchy = 'click_date'
 
 
