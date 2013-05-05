@@ -12,7 +12,7 @@ Please take note: django-adzone has just gone through a major update. If you
 have been using the previous version of django-adzone, then you should not
 upgrade since you are highly likely to break something. You have been warned :)
 
-*0.3.3* is a alpha release. Please test and report any bugs that you may find.
+*0.3.4* is a alpha release. Please test and report any bugs that you may find.
 
 h2. Release Notes
 
